@@ -1,5 +1,8 @@
 #! /bin/bash
 
+# Neither undefined variables (-u) or error in command (-e) are allowed
+set -eu;
+
 VERBOSE=false
 HELP=false
 SOURCE="$(pwd)/srcs"
@@ -8,8 +11,13 @@ BUILD="$(pwd)/build"
 PYTHON2=python2
 PYTHON3=python3
 
+
+# Git remote definition
+OPENCV_REMOTE="https://github.com/opencv/opencv.git"
+OPENCV_CONTRIB_REMOTE="https://github.com/opencv/opencv_contrib.git"
+
 while true; do
-	case "$1" in
+	case "${1:-unset}" in
 		-v | --verbose) VERBOSE=true; shift ;;
 		-h | --help) HELP=true; shift ;;
 		-p | --prefix) PREFIX=$(readlink -f "$2"); shift 2;;
@@ -65,8 +73,10 @@ log "Using $PYTHON3_VERSION as python3 version ..."
 
 log "Checking sources folder...."
 if [ ! -d "$SOURCE"/opencv ]; then
-	echo "$SOURCE/opencv does not exist";
-	exit 1
+	echo "$SOURCE/opencv does not exist... cloning a fresh repo";
+	[ -d "$SOURCE" ] || mkdir -p "$SOURCE"
+	cd $SOURCE && git clone "$OPENCV_REMOTE"
+	cd -
 fi
 
 log "Creating build folder..."
@@ -93,8 +103,11 @@ log "Creating python3 virtualenv..."
 python3 -m venv "$PREFIX"
 
 log "Activating virtualenv..."
+
+set +eu;
 # shellcheck source=/dev/null
 . "$PREFIX/bin/activate"
+set +eu;
 log "Installing numpy..."
 pip install numpy
 
