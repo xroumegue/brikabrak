@@ -260,4 +260,48 @@ make install
 log "Creating symbolic link on cv2 library..."
 find  "$PREFIX" -iname 'cv2.cpython*.so' -execdir ln -s {} cv2.so \;
 
+cat > "$PREFIX/activateOpenCVWorld" <<EOF
+# you must source this file
+
+function deactivateOpenCVWorld {
+
+	deactivate
+
+	if [ -n "$_OLD_PKG_CONFIG_PATH" ] ;
+	then
+	    PKG_CONFIG_PATH="$_OLD_PKG_CONFIG_PATH"
+	    export PKG_CONFIG_PATH
+	    unset _OLD_PKG_CONFIG_PATH
+	else
+	    unset PKG_CONFIG_PATH
+	fi
+
+	if [ -n "$_OLD_LD_LIBRARY_PATH" ] ;
+	then
+	    LD_LIBRARY_PATH="$_OLD_LD_LIBRARY_PATH"
+	    export LD_LIBRARY_PATH
+	    unset _OLD_LD_LIBRARY_PATH
+	else
+	    unset LD_LIBRARY_PATH
+	fi
+}
+
+if [ -n "$PKG_CONFIG_PATH" ] ; then
+    _OLD_PKG_CONFIG_PATH=$PKG_CONFIG_PATH
+fi
+
+if [ -n "$LD_LIBRARY_PATH" ] ; then
+    _OLD_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
+fi
+
+. $PREFIX/bin/activate
+
+export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig":$PKG_CONFIG_PATH
+export LD_LIBRARY_PATH="$PREFIX/lib":$LD_LIBRARY_PATH
+
+EOF
+
 log "Done !"
+
+echo "To enter the awesome opencv world: # . $PREFIX/activateOpenCVWorld"
+echo "To exit the awesome opencv world: # deactivateOpenCVWorld"
