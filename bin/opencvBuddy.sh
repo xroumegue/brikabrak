@@ -117,11 +117,12 @@ log "Configuring OpenCV..."
 
 cmake \
 	-G"Unix Makefiles" \
+	-DENABLE_CCACHE=ON \
 	-DCMAKE_INSTALL_PREFIX="$PREFIX" \
 	-DBUILD_DOCS=OFF \
 	-DBUILD_PERF_TESTS=OFF \
 	-DBUILD_TESTS=OFF \
-	-DBUILD_WITH_DEBUG_INFO=OFF \
+	-DBUILD_WITH_DEBUG_INFO=ON \
 	-DDOWNLOAD_EXTERNAL_TEST_DATA=OFF \
 	-DINSTALL_TEST=OFF \
 	-DBUILD_WITH_STATIC_CRT=OFF \
@@ -131,7 +132,7 @@ cmake \
 	-DENABLE_NOISY_WARNINGS=OFF \
 	-DENABLE_OMIT_FRAME_POINTER=ON \
 	-DENABLE_PRECOMPILED_HEADERS=OFF \
-	-DENABLE_PROFILING=OFF \
+	-DENABLE_PROFILING=ON \
 	-DOPENCV3_WARNINGS_ARE_ERRORS=OFF \
 	-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=OFF \
 	-DCMAKE_SKIP_RPATH=OFF \
@@ -173,21 +174,21 @@ cmake \
 	-DENABLE_SSE42=ON \
 	-DENABLE_SSSE3=ON \
 	-DBUILD_CUDA_STUBS=OFF \
-	-DBUILD_opencv_cudaarithm=OFF \
-	-DBUILD_opencv_cudabgsegm=OFF \
-	-DBUILD_opencv_cudacodec=OFF \
-	-DBUILD_opencv_cudafeatures2d=OFF \
-	-DBUILD_opencv_cudafilters=OFF \
-	-DBUILD_opencv_cudaimgproc=OFF \
-	-DBUILD_opencv_cudalegacy=OFF \
-	-DBUILD_opencv_cudaobjdetect=OFF \
-	-DBUILD_opencv_cudaoptflow=OFF \
-	-DBUILD_opencv_cudastereo=OFF \
-	-DBUILD_opencv_cudawarping=OFF \
-	-DBUILD_opencv_cudev=OFF \
-	-DWITH_CUBLAS=OFF \
-	-DWITH_CUDA=OFF \
-	-DWITH_CUFFT=OFF \
+	-DBUILD_opencv_cudaarithm=ON \
+	-DBUILD_opencv_cudabgsegm=ON \
+	-DBUILD_opencv_cudacodec=ON \
+	-DBUILD_opencv_cudafeatures2d=ON \
+	-DBUILD_opencv_cudafilters=ON \
+	-DBUILD_opencv_cudaimgproc=ON \
+	-DBUILD_opencv_cudalegacy=ON \
+	-DBUILD_opencv_cudaobjdetect=ON \
+	-DBUILD_opencv_cudaoptflow=ON \
+	-DBUILD_opencv_cudastereo=ON \
+	-DBUILD_opencv_cudawarping=ON \
+	-DBUILD_opencv_cudev=ON \
+	-DWITH_CUBLAS=ON \
+	-DWITH_CUDA=ON \
+	-DWITH_CUFFT=ON \
 	-DWITH_NVCUVID=OFF \
 	-DWITH_OPENCLAMDBLAS=OFF \
 	-DWITH_OPENCLAMDFFT=OFF \
