@@ -57,11 +57,7 @@ users=$CHROOT_USER
 
 EOF
 
-{\
-echo "deb $MIRROR $RELEASE main contrib non-free";\
-echo "deb-src $MIRROR $RELEASE main contrib non-free";\
-echo "deb $MIRROR $EXTRA_RELEASE main contrib non-free";\
-echo "deb-src $MIRROR $EXTRA_RELEASE main contrib non-free";} > $CHROOT_HOME/etc/apt/sources.list
+{ echo "deb $MIRROR $RELEASE main contrib non-free";echo "deb-src $MIRROR $RELEASE main contrib non-free"; echo "deb $MIRROR $EXTRA_RELEASE main contrib non-free"; echo "deb-src $MIRROR $EXTRA_RELEASE main contrib non-free";} > $CHROOT_HOME/etc/apt/sources.list
 
 
 cat > $CHROOT_HOME/etc/apt/preferences <<EOF
