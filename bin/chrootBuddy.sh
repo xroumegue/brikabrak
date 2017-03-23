@@ -10,6 +10,9 @@ RELEASE="testing"
 ARCH="amd64"
 USER="root"
 
+me=$(readlink -f "$0" | cut -d \. -f 1)
+packages="$me.packages"
+
 while true; do
 	case "${1:-unset}" in
 		-v | --verbose) VERBOSE=true; shift ;;
@@ -19,6 +22,7 @@ while true; do
 		-u | --user) USER=$2; shift 2;;
 		-r | --release) RELEASE=$2; shift 2;;
 		-a | --arch) ARCH=$2; shift 2;;
+		-P | --packages) PACKAGES_LIST=${*:2}; shift 2;;
 		-- ) shift; break;;
 		*) break ;;
 	esac
@@ -43,6 +47,7 @@ OPTIONS:
 	--release: Debian release (stable, testing, unstable)
 	--arch: chroot architecture
 	--prefix: Where to install the chroot
+	--packages: preinstalled packages (see $me.packages)
 EOF
 	exit 0
 }
@@ -73,31 +78,16 @@ CHROOT_NAME=$NAME
 CHROOT_HOME=$CHROOT_ROOT/$CHROOT_NAME 
 CHROOT_USER=$USER
 CHROOT_CONF="/etc/schroot/chroot.d/$CHROOT_NAME.conf"
-PKG_BASE=locales,sudo,libc6,libc6-dev,linux-libc-dev,bash,vim,cscope,exuberant-ctags,build-essential,\
-git,pkg-config,cmake,zlib1g-dev,multiarch-support
 
-PKG_ANDROID=openjdk-7-jdk,python,git-core,gnupg,flex,bison,gperf,zip,curl,zlib1g-dev,libc6-dev-i386,\
-lib32ncurses5-dev,x11proto-core-dev,libx11-dev,lib32z1-dev,ccache,libgl1-mesa-dev,\
-libxml2-utils,xsltproc,unzip,gcc-multilib,g++-multilib,ca-certificates
-
-PKG_KERNEL=bc,libssl-dev
-
-PKG_OPENCV=libgtk2.0-dev,libavcodec-dev,libavformat-dev,libswscale-dev,libavresample3,\
-libtbb2,libtbb-dev,libjpeg-dev,libpng-dev,libtiff5-dev,libdc1394-22-dev,\
-libv4l-dev
-
-PKG_PYTHON=python,python-dev,python3,python3-dev,python3-venv
-
-PKG_MATH=libatlas3-base,libatlas-base-dev,libopenblas-dev,liblapacke-dev
-
-PACKAGES=$PKG_BASE
-PKG_EXTRA=''
-#PACKAGES=$PKG_BASE,$PKG_OPENCV,$PKG_PYTHON,$PKG_MATH
-#PKG_EXTRA=nvidia-cuda-toolkit
-
+PACKAGES=$(cat "$me".packages/base.packages),
+if [ "${PACKAGES_LIST:-unset}" != 'unset' ]; then
+	for p in ${PACKAGES_LIST}; do
+		PACKAGES+=$(cat "$me.packages/$p.packages")
+		PACKAGES+=,
+	done
+fi
 
 SCRIPT_2ND_STAGE=/root/2ndstage_$CHROOT_NAME
-
 
 set -x
 
