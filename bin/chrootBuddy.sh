@@ -18,7 +18,7 @@ while true; do
 		-n | --name) NAME=$2; shift 2;;
 		-u | --user) USER=$2; shift 2;;
 		-r | --release) RELEASE=$2; shift 2;;
-		-a | --arch) BUILD=$2; shift 2;;
+		-a | --arch) ARCH=$2; shift 2;;
 		-- ) shift; break;;
 		*) break ;;
 	esac
@@ -101,7 +101,7 @@ SCRIPT_2ND_STAGE=/root/2ndstage_$CHROOT_NAME
 
 set -x
 
-debootstrap --include=$PACKAGES --arch=$ARCH $RELEASE $CHROOT_HOME $MIRROR
+debootstrap --include="$PACKAGES" --arch="$ARCH" "$RELEASE" "$CHROOT_HOME" "$MIRROR"
 
 [ $? == 0 ] || exit 1
 
@@ -146,20 +146,19 @@ Pin-Priority: 500
 
 EOF
 
-if [ -n "$http_proxy" ]; then
+if [ "${http_proxy:-unset}" != 'unset' ]; then
 log "Configuring http proxy ... "
 cat >> "$CHROOT_HOME/etc/apt/apt.conf" <<EOF
 Acquire::http::Proxy "$http_proxy";
 EOF
 fi
 
-if [ -n "$ftp_proxy" ]; then
+if [ "${ftp_proxy:-unset}" != 'unset' ]; then
 log "Configuring ftp proxy ... "
 cat >> "$CHROOT_HOME/etc/apt/apt.conf" <<EOF
 Acquire::ftp::Proxy "$ftp_proxy";
 EOF
 fi
-
 
 log "Configuring locales... "
 sed -i  -e   's/# en_US/en_US/' "$CHROOT_HOME/etc/locale.gen"
@@ -180,7 +179,7 @@ apt update
 apt full-upgrade -y
 EOF
 
-if [ -n "$PKG_EXTRA" ]; then
+if [ "${PKG_EXTRA:-unset}" != 'unset' ]; then
 cat >> "$CHROOT_HOME/$SCRIPT_2ND_STAGE" <<EOF
 apt install -y $PKG_EXTRA
 EOF
