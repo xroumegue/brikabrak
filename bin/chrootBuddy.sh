@@ -117,6 +117,8 @@ if [ ! -d "/etc/schroot/$NAME" ]; then
 cp -r /etc/schroot/default "/etc/schroot/$NAME"
 fi
 
+log "Configuring fstab for shm"
+sed -i  -e 's/#\/dev\/shm/\/dev\/shm/' "/etc/schroot/$NAME/fstab"
 
 log "Configuring release sources... "
 
