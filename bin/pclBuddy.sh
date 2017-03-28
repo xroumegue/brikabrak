@@ -56,12 +56,16 @@ poc_setup()
 		git clone ssh://git.mordor/pcl.git "$POC"
 	else
 		cd "$POC"
-		git update remote
+		#git update remote
 		git checkout origin/master
 	fi
 
 	cd "$POC"
-	cmake .
+	git clean -fdx
+	mkdir build && cd build
+	#help cmake to find PCLConfig.cmake
+	#(weird installation - http://pointclouds.org/documentation/tutorials/using_pcl_pcl_config.php)
+	cmake -DPCL_DIR:PATH=$PCL/PCLConfig.cmake ..
 	make
 }
 
