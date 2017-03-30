@@ -1,2 +1,1 @@
-cmake,libboost1.55-all-dev,libeigen3-dev,libgtest-dev,doxygen-latex,dvipng,libusb-1.0-0-dev
-bison,unzip,flex,libqt4-opengl-dev,libxt-dev,clang,ssh,sudo
+cmake,libboost1.55-all-dev,libeigen3-dev,libgtest-dev,doxygen-latex,dvipng,libusb-1.0-0-dev,bison,unzip,flex,libqt4-opengl-dev,libxt-dev,clang,ssh,sudo,libgl1-mesa-dri
