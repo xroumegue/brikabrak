@@ -12,7 +12,8 @@ USER="root"
 GROUP="chroot"
 
 me=$(readlink -f "$0" | cut -d \. -f 1)
-packages="$me.packages"
+share=$(echo $me | sed -e "s/bin/share/g")
+packages="$share.packages"
 
 while true; do
 	case "${1:-unset}" in
@@ -24,6 +25,7 @@ while true; do
 		-r | --release) RELEASE=$2; shift 2;;
 		-a | --arch) ARCH=$2; shift 2;;
 		-P | --packages) PACKAGES_LIST+=" $2"; shift 2;;
+		-e | --extra) EXTRA_LIST=$2; shift 2;;
 		-g | --group) GROUP=$2; shift 2;;
 		-- ) shift; break;;
 		*) break ;;
@@ -50,7 +52,12 @@ OPTIONS:
 	--release: Debian release (stable, testing, unstable)
 	--arch: chroot architecture
 	--prefix: Where to install the chroot
-	--packages: preinstalled packages (see $me.packages)
+	--extra: postinstalled packages, at next available version
+	--packages: preinstalled packages (see $packages)
+
+EXAMPLE:
+	sudo ./chrootBuddy.sh  --verbose --name enet --release stable --prefix /srv/chroot --arch amd64 --extra cuda --packages enet
+
 EOF
 	exit 0
 }
@@ -83,12 +90,18 @@ CHROOT_USER=$USER
 CHROOT_CONF="/etc/schroot/chroot.d/$CHROOT_NAME.conf"
 CHROOT_GROUP=$GROUP
 
-PACKAGES=$(cat "$me".packages/base.packages),
+PACKAGES=$(cat "$packages"/base.packages),
 if [ "${PACKAGES_LIST:-unset}" != 'unset' ]; then
 	for p in ${PACKAGES_LIST}; do
-		PACKAGES+=$(cat "$me.packages/$p.packages")
+		PACKAGES+=$(cat "$packages/$p.packages")
 		PACKAGES+=,
 	done
+fi
+
+unset PKG_EXTRA
+if [ "${EXTRA_LIST:-unset}" != 'unset' ]; then
+	PKG_EXTRA=$(cat "$packages/$EXTRA_LIST.packages")
+	PKG_EXTRA=$(echo $PKG_EXTRA | sed -e "s/,/ /g")
 fi
 
 SCRIPT_2ND_STAGE=/root/2ndstage_$CHROOT_NAME
@@ -114,16 +127,17 @@ groups=$CHROOT_GROUP
 EOF
 
 else
-log "Skipping creation of dedicated schroot conf file $CHROOT_CONF, already exists "
+log "Skipping creation of dedicated schroot conf file: $CHROOT_CONF already exists "
 fi
 
 if [ ! -d "/etc/schroot/$NAME" ]; then
 cp -r /etc/schroot/default "/etc/schroot/$NAME"
+else
+log "Skipping creation of dedicated schroot fstab file: /etc/schroot/$NAME already exists "
 fi
 
 log "Configuring fstab for shm"
 sed -i  -e 's/#\/dev\/shm/\/dev\/shm/' "/etc/schroot/$NAME/fstab"
-echo "/work       /work        none    rw,bind         0       0" >> "/etc/schroot/$NAME/fstab"
 
 log "Configuring release sources... "
 
@@ -178,7 +192,7 @@ EOF
 
 if [ "${PKG_EXTRA:-unset}" != 'unset' ]; then
 cat >> "$CHROOT_HOME/$SCRIPT_2ND_STAGE" <<EOF
-apt install -y $PKG_EXTRA
+apt install -y -t $EXTRA_RELEASE $PKG_EXTRA
 EOF
 fi
 
