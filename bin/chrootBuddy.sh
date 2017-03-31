@@ -9,6 +9,7 @@ NAME="debian"
 RELEASE="testing"
 ARCH="amd64"
 USER="root"
+GROUP="chroot"
 
 me=$(readlink -f "$0" | cut -d \. -f 1)
 packages="$me.packages"
@@ -23,6 +24,7 @@ while true; do
 		-r | --release) RELEASE=$2; shift 2;;
 		-a | --arch) ARCH=$2; shift 2;;
 		-P | --packages) PACKAGES_LIST=${*:2}; shift 2;;
+		-g | --group) GROUP=$2; shift 2;;
 		-- ) shift; break;;
 		*) break ;;
 	esac
@@ -78,6 +80,7 @@ CHROOT_NAME=$NAME
 CHROOT_HOME=$CHROOT_ROOT/$CHROOT_NAME 
 CHROOT_USER=$USER
 CHROOT_CONF="/etc/schroot/chroot.d/$CHROOT_NAME.conf"
+CHROOT_GROUP=$GROUP
 
 PACKAGES=$(cat "$me".packages/base.packages),
 if [ "${PACKAGES_LIST:-unset}" != 'unset' ]; then
@@ -106,6 +109,7 @@ root-groups=root
 type=directory
 users=$CHROOT_USER
 profile=$NAME
+groups=$CHROOT_GROUP
 
 EOF
 
