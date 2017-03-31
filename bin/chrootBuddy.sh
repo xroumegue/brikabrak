@@ -46,6 +46,7 @@ OPTIONS:
 	--help: This output messge
 	--name: The name of the chroot
 	--user: user authorized to use the chroot
+	--group: group authorized to use the chroot
 	--release: Debian release (stable, testing, unstable)
 	--arch: chroot architecture
 	--prefix: Where to install the chroot
@@ -123,6 +124,7 @@ fi
 
 log "Configuring fstab for shm"
 sed -i  -e 's/#\/dev\/shm/\/dev\/shm/' "/etc/schroot/$NAME/fstab"
+echo "/work       /work        none    rw,bind         0       0" >> "/etc/schroot/$NAME/fstab"
 
 log "Configuring release sources... "
 
