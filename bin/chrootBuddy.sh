@@ -23,7 +23,7 @@ while true; do
 		-u | --user) USER=$2; shift 2;;
 		-r | --release) RELEASE=$2; shift 2;;
 		-a | --arch) ARCH=$2; shift 2;;
-		-P | --packages) PACKAGES_LIST=${*:2}; shift 2;;
+		-P | --packages) PACKAGES_LIST+=" $2"; shift 2;;
 		-g | --group) GROUP=$2; shift 2;;
 		-- ) shift; break;;
 		*) break ;;
@@ -94,7 +94,6 @@ fi
 SCRIPT_2ND_STAGE=/root/2ndstage_$CHROOT_NAME
 
 set -x
-
 debootstrap --include="$PACKAGES" --arch="$ARCH" "$RELEASE" "$CHROOT_HOME" "$MIRROR"
 
 [ $? == 0 ] || exit 1
