@@ -100,7 +100,7 @@ else
 fi
 
 log "Creating python3 virtualenv..."
-python3 -m venv "$PREFIX"
+"$PYTHON3" -m venv "$PREFIX"
 
 log "Activating virtualenv..."
 
