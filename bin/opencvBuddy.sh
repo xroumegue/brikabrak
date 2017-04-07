@@ -110,6 +110,8 @@ set +eu;
 set +eu;
 log "Installing numpy..."
 pip install numpy
+log "Installing scipy..."
+pip install scipy
 
 cd "$BUILD" || exit 1;
 
