@@ -1,1 +1,1 @@
-libboost-all-dev,libavformat-dev,libavutil-dev,libavcodec-dev,libswscale-dev
+dos2unix,libboost-all-dev,libavformat-dev,libavutil-dev,libavcodec-dev,libswscale-dev,libjpeg-dev
