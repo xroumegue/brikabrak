@@ -1,1 +1,1 @@
-nvidia-cuda-toolkit,libthrust-dev,libpng-dev,libfreetype6-dev
+nvidia-cuda-toolkit,libthrust-dev,libpng-dev,libfreetype6-dev,libncurses5-dev,libreadline-dev,libgraphicsmagick1-dev
