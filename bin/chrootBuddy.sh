@@ -57,7 +57,7 @@ OPTIONS:
 
 EXAMPLE:
 	sudo ./chrootBuddy.sh  --verbose --name enet --release stable --prefix /srv/chroot --arch amd64 --extra cuda --packages enet
-	sudo ./chrootBuddy.sh  --verbose --name ssd  --release stable --prefix /srv/chroot --arch amd64 --extra cuda --packages "opencv ssd"
+	sudo ./chrootBuddy.sh  --verbose --name ssd  --release stable --prefix /srv/chroot --arch amd64 --extra "cuda extra" --packages "opencv ssd"
 EOF
 	exit 0
 }
@@ -100,7 +100,10 @@ fi
 
 unset PKG_EXTRA
 if [ "${EXTRA_LIST:-unset}" != 'unset' ]; then
-	PKG_EXTRA=$(cat "$packages/$EXTRA_LIST.packages")
+	for p in ${EXTRA_LIST}; do
+		PKG_EXTRA+=$(cat "$packages/$p.packages")
+		PKG_EXTRA+=,
+	done
 	PKG_EXTRA=$(echo $PKG_EXTRA | sed -e "s/,/ /g")
 fi
 
