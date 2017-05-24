@@ -57,7 +57,7 @@ OPTIONS:
 
 EXAMPLE:
 	sudo ./chrootBuddy.sh  --verbose --name enet --release stable --prefix /srv/chroot --arch amd64 --extra cuda --packages enet
-	sudo ./chrootBuddy.sh  --verbose --name ssd  --release stable --prefix /srv/chroot --arch amd64 --extra "cuda extra" --packages "opencv ssd"
+	sudo ./chrootBuddy.sh  --verbose --name ssd  --release stable --prefix /srv/chroot --arch amd64 --extra "cuda extra" --packages "opencv ssd enet"
 EOF
 	exit 0
 }
@@ -85,7 +85,7 @@ fi
 CHROOT_ROOT="$PREFIX"
 MIRROR=http://ftp.fr.debian.org/debian/
 CHROOT_NAME=$NAME
-CHROOT_HOME=$CHROOT_ROOT/$CHROOT_NAME 
+CHROOT_HOME=$CHROOT_ROOT/$CHROOT_NAME
 CHROOT_USER=$USER
 CHROOT_CONF="/etc/schroot/chroot.d/$CHROOT_NAME.conf"
 CHROOT_GROUP=$GROUP
@@ -118,7 +118,7 @@ if [ ! -f "$CHROOT_CONF"  ]; then
 log "Creating dedicated schroot conf file $CHROOT_CONF "
 cat > "$CHROOT_CONF" <<EOF
 [$CHROOT_NAME]
-description=Debian $RELEASE $ARCH 
+description=Debian $RELEASE $ARCH
 directory=$CHROOT_HOME
 preserve-environment=true
 root-groups=root
@@ -156,7 +156,7 @@ Pin-Priority: 800
 
 Package: *
 Pin: release a=$EXTRA_RELEASE
-Pin-Priority: 500 
+Pin-Priority: 500
 
 EOF
 
