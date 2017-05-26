@@ -8,8 +8,8 @@ HELP=false
 SOURCE="$(pwd)/srcs"
 PREFIX="$(pwd)/sandbox"
 BUILD="$(pwd)/build"
-PYTHON2=python2
-PYTHON3=python3
+PYTHON2="/usr/bin/python2"
+PYTHON3="/usr/bin/python3"
 
 
 # Git remote definition
@@ -20,11 +20,11 @@ while true; do
 	case "${1:-unset}" in
 		-v | --verbose) VERBOSE=true; shift ;;
 		-h | --help) HELP=true; shift ;;
-		-p | --prefix) PREFIX=$(readlink -f "$2"); shift 2;;
-		-s | --source) SOURCE=$(readlink -f "$2"); shift 2;;
-		-b | --build) BUILD=$(readlink -f "$2"); shift 2;;
-		--python2) PYTHON2=$2; shift;;
-		--python3) PYTHON3=$2; shift;;
+		-p | --prefix) PREFIX=$(readlink -m "$2"); shift 2;;
+		-s | --source) SOURCE=$(readlink -m "$2"); shift 2;;
+		-b | --build) BUILD=$(readlink -m "$2"); shift 2;;
+		--python2) PYTHON2=$(readlink -f "$2"); shift 2;;
+		--python3) PYTHON3=$(readlink -f "$2"); shift 2;;
 		-- ) shift; break;;
 		*) break ;;
 	esac
@@ -38,7 +38,7 @@ function log {
 function help {
 	cat <<EOF
 NAME:
-	$0 - Build opencv library and install it in a python3 virtualenv
+	$0 - Build opencv library and install it in
 
 OPTIONS:
 	--verbose: Generate more logs
@@ -72,7 +72,7 @@ log "Using $PYTHON2_VERSION as python2 version ..."
 log "Using $PYTHON3_VERSION as python3 version ..."
 
 log "Checking sources folder...."
-if [ ! -d "$SOURCE"/opencv ]; then
+if [ ! -d "$SOURCE" ]; then
 	echo "$SOURCE/opencv does not exist... cloning a fresh repo";
 	[ -d "$SOURCE" ] || mkdir -p "$SOURCE"
 	cd $SOURCE && git clone "$OPENCV_REMOTE"
@@ -83,7 +83,7 @@ log "Creating build folder..."
 if [ ! -d "$BUILD" ];
 then
 	echo "Creating $BUILD does not exist";
-	mkdir "$BUILD"
+	mkdir -p "$BUILD"
 else
 	echo "Cleaning existing build folder $BUILD"
 	rm -fr "${BUILD:?}"/*
@@ -92,26 +92,14 @@ fi
 
 if [ ! -d "$PREFIX" ];
 then
-	log "Creating virtualenv folder..."
+	log "Creating installation folder..."
 	mkdir -p "$PREFIX"
-else
-	log "Cleaning virtualenv folder..."
-	rm -fr "${PREFIX:?}"/*
 fi
-
-log "Creating python3 virtualenv..."
-"$PYTHON3" -m venv "$PREFIX"
-
-log "Activating virtualenv..."
 
 set +eu;
 # shellcheck source=/dev/null
 . "$PREFIX/bin/activate"
 set +eu;
-log "Installing numpy..."
-pip install numpy
-log "Installing scipy..."
-pip install scipy
 
 cd "$BUILD" || exit 1;
 
@@ -262,10 +250,8 @@ cmake \
 	-DBUILD_opencv_python3=ON \
 	-DPYTHON3_EXECUTABLE="$(which "$PYTHON3")" \
 	-DPYTHON2_EXECUTABLE="$(which "$PYTHON2")" \
-	"$SOURCE/opencv"
+	"$SOURCE"
 
-log "Deactivating virtualenv..."
-deactivate
 
 log "Building OpenCV..."
 make "-j$(nproc)"
@@ -275,48 +261,5 @@ make install
 log "Creating symbolic link on cv2 library..."
 find  "$PREFIX" -iname 'cv2.cpython*.so' -execdir ln -s {} cv2.so \;
 
-cat > "$PREFIX/activateOpenCVWorld" <<EOF
-# you must source this file
 
-function deactivateOpenCVWorld {
-
-	deactivate
-
-	if [ -n "$_OLD_PKG_CONFIG_PATH" ] ;
-	then
-	    PKG_CONFIG_PATH="$_OLD_PKG_CONFIG_PATH"
-	    export PKG_CONFIG_PATH
-	    unset _OLD_PKG_CONFIG_PATH
-	else
-	    unset PKG_CONFIG_PATH
-	fi
-
-	if [ -n "$_OLD_LD_LIBRARY_PATH" ] ;
-	then
-	    LD_LIBRARY_PATH="$_OLD_LD_LIBRARY_PATH"
-	    export LD_LIBRARY_PATH
-	    unset _OLD_LD_LIBRARY_PATH
-	else
-	    unset LD_LIBRARY_PATH
-	fi
-}
-
-if [ -n "$PKG_CONFIG_PATH" ] ; then
-    _OLD_PKG_CONFIG_PATH=$PKG_CONFIG_PATH
-fi
-
-if [ -n "$LD_LIBRARY_PATH" ] ; then
-    _OLD_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
-fi
-
-. $PREFIX/bin/activate
-
-export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig":$PKG_CONFIG_PATH
-export LD_LIBRARY_PATH="$PREFIX/lib":$LD_LIBRARY_PATH
-
-EOF
-
-log "Done !"
-
-echo "To enter the awesome opencv world: # . $PREFIX/activateOpenCVWorld"
-echo "To exit the awesome opencv world: # deactivateOpenCVWorld"
+log "OpenCV build and installed Done !"
