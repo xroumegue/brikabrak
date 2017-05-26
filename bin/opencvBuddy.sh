@@ -73,9 +73,9 @@ log "Using $PYTHON3_VERSION as python3 version ..."
 
 log "Checking sources folder...."
 if [ ! -d "$SOURCE" ]; then
-	echo "$SOURCE/opencv does not exist... cloning a fresh repo";
+	echo "$SOURCE does not exist... cloning a fresh repo";
 	[ -d "$SOURCE" ] || mkdir -p "$SOURCE"
-	cd $SOURCE && git clone "$OPENCV_REMOTE"
+	cd $SOURCE && git clone "$OPENCV_REMOTE" .
 	cd -
 fi
 
@@ -96,9 +96,7 @@ then
 	mkdir -p "$PREFIX"
 fi
 
-set +eu;
 # shellcheck source=/dev/null
-. "$PREFIX/bin/activate"
 set +eu;
 
 cd "$BUILD" || exit 1;
