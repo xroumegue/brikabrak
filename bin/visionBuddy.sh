@@ -88,8 +88,6 @@ do
 	pip3 install "$package"
 done < "$BASEDIR/share/visionBuddy.packages/base.packages"
 
-
-
 $BINDIR/opencvBuddy.sh \
 	--prefix "$PREFIX" \
 	--source "$SOURCE/opencv" \
@@ -103,6 +101,19 @@ then
 	log "error while installing opencv.. exiting"
 	exit 1
 fi
+
+
+$BINDIR/openvxBuddy.sh \
+	--prefix "$PREFIX" \
+	--source "$SOURCE/openvx/amdovx-core" \
+	--build "$BUILD/openvx/amdovx-core" \
+	--verbose
+if [ $? != 0 ]
+then
+	log "error while installing openvx AMD.. exiting"
+	exit 1
+fi
+
 log "Deactivating virtualenv..."
 deactivate
 
