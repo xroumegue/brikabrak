@@ -57,7 +57,7 @@ OPTIONS:
 
 EXAMPLE:
 	sudo ./chrootBuddy.sh  --verbose --name enet --release stable --prefix /srv/chroot --arch amd64 --extra cuda --packages enet
-	sudo ./chrootBuddy.sh  --verbose --name ssd  --release stable --prefix /srv/chroot --arch amd64 --extra "cuda extra" --packages "opencv ssd enet"
+	sudo ./chrootBuddy.sh  --verbose --name epoc  --release stable --prefix /srv/chroot --arch amd64 --extra "cuda extra" --packages "opencv ssd enet"
 EOF
 	exit 0
 }
