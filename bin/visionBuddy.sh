@@ -105,8 +105,8 @@ fi
 
 $BINDIR/openvxBuddy.sh \
 	--prefix "$PREFIX" \
-	--source "$SOURCE/openvx/amdovx-core" \
-	--build "$BUILD/openvx/amdovx-core" \
+	--source "$SOURCE/openvx" \
+	--build "$BUILD/openvx" \
 	--verbose
 if [ $? != 0 ]
 then

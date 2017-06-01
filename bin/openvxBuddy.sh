@@ -10,7 +10,8 @@ PREFIX="$(pwd)/sandbox"
 BUILD="$(pwd)/build"
 
 # Git remote definition
-OPENVX_REMOTE="https://github.com/xroumegue/amdovx-core.git"
+OPENVX_CORE_REMOTE="https://github.com/xroumegue/amdovx-core.git"
+OPENVX_MODULE_REMOTE="https://github.com/xroumegue/amdovx-modules.git"
 
 while true; do
 	case "${1:-unset}" in
@@ -55,22 +56,27 @@ then
 	help
 fi
 
+[ ! -d "$SOURCE " ] || mkdir -p "$SOURCE"
+[ ! -d "$BUILD" ] || mkdir -p "$BUILD"
+
+SOURCE_CORE="$SOURCE/amdovx-core"
+BUILD_CORE="$BUILD/amdovx-core"
+
 log "Checking sources folder...."
-if [ ! -d "$SOURCE" ]; then
-	echo "$SOURCE does not exist... cloning a fresh repo";
-	[ -d "$SOURCE" ] || mkdir -p "$SOURCE"
-	cd $SOURCE && git clone "$OPENVX_REMOTE" .
+if [ ! -d "$SOURCE_CORE" ]; then
+	echo "$SOURCE_CORE does not exist... cloning a fresh repo";
+	cd $SOURCE && git clone "$OPENVX_CORE_REMOTE"
 	cd -
 fi
 
 log "Creating build folder..."
-if [ ! -d "$BUILD" ];
+if [ ! -d "$BUILD_CORE" ];
 then
-	echo "Creating $BUILD does not exist";
-	mkdir -p "$BUILD"
+	echo "Creating $BUILD_CORE does not exist";
+	mkdir -p "$BUILD_CORE"
 else
-	echo "Cleaning existing build folder $BUILD"
-	rm -fr "${BUILD:?}"/*
+	echo "Cleaning existing build folder $BUILD_CORE"
+	rm -fr "${BUILD_CORE:?}"/*
 fi
 
 
@@ -82,10 +88,40 @@ fi
 
 set +eu;
 
-cd "$BUILD" || exit 1;
+cd "$BUILD_CORE" || exit 1;
 
-cmake -DCMAKE_DISABLE_FIND_PACKAGE_OpenCL=TRUE  -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_INSTALL_PREFIX="$PREFIX" $SOURCE
+cmake -DCMAKE_DISABLE_FIND_PACKAGE_OpenCL=TRUE  -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_INSTALL_PREFIX="$PREFIX" $SOURCE_CORE
 make -j12
 make install
 
-log "OpenVX build and installed Done !"
+log "OpenVX core build and installed Done !"
+
+SOURCE_MODULE="$SOURCE/amdovx-modules"
+BUILD_MODULE="$BUILD/amdovx-modules"
+
+log "Checking sources folder...."
+if [ ! -d "$SOURCE_MODULE" ]; then
+	echo "$SOURCE_MODULE does not exist... cloning a fresh repo";
+	cd $SOURCE && git clone "$OPENVX_MODULE_REMOTE"
+fi
+
+log "Creating build folder..."
+if [ ! -d "$BUILD_MODULE" ];
+then
+	echo "Creating $BUILD_MODULE does not exist";
+	mkdir -p "$BUILD_MODULE"
+else
+	echo "Cleaning existing build folder $BUILD_MODULE"
+	rm -fr "${BUILD_MODULE:?}"/*
+fi
+
+
+set +eu;
+
+cd "$BUILD_MODULE" || exit 1;
+
+cmake -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_INSTALL_PREFIX="$PREFIX" $SOURCE_MODULE/vx_ext_cv
+make -j12
+make install
+
+log "OpenVX module build and installed Done !"
