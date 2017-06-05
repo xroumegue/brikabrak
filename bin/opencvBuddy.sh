@@ -13,7 +13,7 @@ PYTHON3="/usr/bin/python3"
 
 
 # Git remote definition
-OPENCV_REMOTE="https://github.com/opencv/opencv.git"
+OPENCV_CORE_REMOTE="https://github.com/opencv/opencv.git"
 OPENCV_CONTRIB_REMOTE="https://github.com/opencv/opencv_contrib.git"
 
 while true; do
@@ -64,6 +64,13 @@ if $HELP;
 then
 	help
 fi
+OPENCV_VERSION=3.2.0
+
+[ ! -d "$SOURCE " ] || mkdir -p "$SOURCE"
+[ ! -d "$BUILD" ] || mkdir -p "$BUILD"
+
+SOURCE_CORE="$SOURCE/opencv-core"
+SOURCE_CONTRIB="$SOURCE/opencv-contrib"
 
 PYTHON2_VERSION=$($PYTHON2 --version |& cut -d ' ' -f2 | cut -d '.' -f1,2)
 PYTHON3_VERSION=$($PYTHON3 --version |& cut -d ' ' -f2 | cut -d '.' -f1,2)
@@ -71,15 +78,22 @@ PYTHON3_VERSION=$($PYTHON3 --version |& cut -d ' ' -f2 | cut -d '.' -f1,2)
 log "Using $PYTHON2_VERSION as python2 version ..."
 log "Using $PYTHON3_VERSION as python3 version ..."
 
-log "Checking sources folder...."
-if [ ! -d "$SOURCE" ]; then
-	echo "$SOURCE does not exist... cloning a fresh repo";
-	[ -d "$SOURCE" ] || mkdir -p "$SOURCE"
-	cd $SOURCE && git clone "$OPENCV_REMOTE" .
+log "Checking sources folders..."
+if [ ! -d "$SOURCE_CORE" ]; then
+	echo "$SOURCE_CORE does not exist... cloning a fresh repo";
+	cd $SOURCE && git clone "$OPENCV_CORE_REMOTE" $(basename $SOURCE_CORE)
+	git checkout "$OPENCV_VERSION"
+	cd -
+fi
+if [ ! -d "$SOURCE_CONTRIB" ]; then
+	echo "$SOURCE_CONTRIB does not exist... cloning a fresh repo";
+	cd $SOURCE && git clone "$OPENCV_CONTRIB_REMOTE" $(basename $SOURCE_CONTRIB)
+	git checkout "$OPENCV_VERSION"
 	cd -
 fi
 
-log "Creating build folder..."
+
+log "Creating build folders..."
 if [ ! -d "$BUILD" ];
 then
 	echo "Creating $BUILD does not exist";
@@ -101,10 +115,11 @@ set +eu;
 
 cd "$BUILD" || exit 1;
 
-log "Configuring OpenCV..."
+log "Configuring OpenCV core..."
 
 cmake \
 	-G"Unix Makefiles" \
+	-DOPENCV_EXTRA_MODULES_PATH="$SOURCE_CONTRIB/modules" \
 	-DCMAKE_INSTALL_PREFIX="$PREFIX" \
 	-DBUILD_DOCS=OFF \
 	-DBUILD_PERF_TESTS=OFF \
@@ -248,7 +263,7 @@ cmake \
 	-DBUILD_opencv_python3=ON \
 	-DPYTHON3_EXECUTABLE="$(which "$PYTHON3")" \
 	-DPYTHON2_EXECUTABLE="$(which "$PYTHON2")" \
-	"$SOURCE"
+	"$SOURCE_CORE"
 
 
 log "Building OpenCV..."
@@ -258,6 +273,5 @@ make install
 
 log "Creating symbolic link on cv2 library..."
 find  "$PREFIX" -iname 'cv2.cpython*.so' -execdir ln -s {} cv2.so \;
-
 
 log "OpenCV build and installed Done !"
