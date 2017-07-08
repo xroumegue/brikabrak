@@ -1,0 +1,139 @@
+#!/usr/bin/expect
+
+if {$argc != 3} {
+	puts "usage: $argv0 <tty> <board> <action>"
+	exit
+}
+
+set tty [lindex $argv 0]
+set board [lindex $argv 1]
+set action [lindex $argv 2]
+
+set boards "hikey jetson zynq"
+set actions "on off reset"
+
+# Sanity checks on board
+if {[string first $board $boards] == -1} {
+    puts "Valid actions are: $boards"
+    exit
+}
+# Sanity checks on actions
+if {[string first $action $actions] == -1} {
+    puts "Valid actions are: $actions"
+    exit
+}
+
+puts "tty: ${tty}"
+puts "board: ${board}"
+puts "action : ${action}"
+
+# Open tty
+set f [open $tty w+]
+
+spawn -open $f
+stty sane -icrnl -imaxbel -opost -onlcr -isig -icanon -echo 9600 < $tty
+
+# Ping !
+send "p\r"
+expect "pong"
+
+set session "${board}-${action}"
+# Set session
+send "\$${session}\r"
+expect "OK"
+
+#send "r\r"
+#expect "${action}\r\nOK"
+
+switch $board {
+    "jetson" {
+        set l 0
+        switch $action {
+            "on" {
+                # Open switch
+                send "Hsb0r2l${l}=0\r"
+                expect "OK"
+                # Power Up the board
+                send "Hsb0r1l${l}=1\r"
+                expect "OK"
+                # Wait
+                after 3000
+                # Emulate power On button action
+                send "Hsb0r2l${l}=1\r"
+                expect "OK"
+                after 200
+                send "Hsb0r2l${l}=0\r"
+                expect "OK"
+                after 200
+                send "Hsb0r2l${l}=1\r"
+                expect "OK"
+                after 200
+                send "Hsb0r2l${l}=0\r"
+                expect "OK"
+            }
+            "off" {
+                puts "action : ${action}"
+                # Need to emulate Power On button pressed for > 7s
+                # Close switch
+                send "Hsb0r2l${l}=1\r"
+                expect "OK"
+                after 10000
+                # Open Switch
+                send "Hsb0r2l${l}=0\r"
+                expect "OK"
+                # Board should be OFF now..
+                # Unplug power source
+                send "Hsb0r1l${l}=0\r"
+                expect "OK"
+            }
+            "reset" {
+                puts "action : ${action}"
+            }
+            default {
+                puts "$action is not correct"
+                exit
+            }
+        }
+    }
+    "hikey" {
+        set l 1
+        switch $action {
+            "on" {
+                send "Hsb0r1l${l}=1\r"
+                expect "OK"
+            }
+            "off" {
+                send "Hsb0r1l${l}=0\r"
+                expect "OK"
+            }
+            "reset" {
+            }
+            default {
+            }
+        }
+    }
+    "zynq" {
+        set l 2
+        switch $action {
+            "on" {
+                send "Hsb0r1l${l}=1\r"
+                expect "OK"
+            }
+            "off" {
+                send "Hsb0r1l${l}=0\r"
+                expect "OK"
+            }
+            "reset" {
+            }
+            default {
+            }
+        }
+    }
+    default {
+        puts "$board is not a correct board"
+        exit
+    }
+}
+#if {[string equal $action "on"]} {
+#}
+exit
