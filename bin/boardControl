@@ -10,7 +10,7 @@ set board [lindex $argv 1]
 set action [lindex $argv 2]
 
 set boards "hikey jetson zynq"
-set actions "on off reset"
+set actions "on off reset connect disconnect"
 
 # Sanity checks on board
 if {[string first $board $boards] == -1} {
@@ -90,7 +90,7 @@ switch $board {
                 puts "action : ${action}"
             }
             default {
-                puts "$action is not correct"
+                puts "$action is not supported"
                 exit
             }
         }
@@ -108,7 +108,16 @@ switch $board {
             }
             "reset" {
             }
+            "connect" {
+                send "Hsb0r0l${l}=1\r"
+                expect "OK"
+            }
+            "disconnect" {
+                send "Hsb0r0l${l}=0\r"
+                expect "OK"
+            }
             default {
+                puts "$action is not supported"
             }
         }
     }
@@ -126,6 +135,7 @@ switch $board {
             "reset" {
             }
             default {
+                puts "$action is not supported"
             }
         }
     }
