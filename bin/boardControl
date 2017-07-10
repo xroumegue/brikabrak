@@ -1,16 +1,18 @@
 #!/usr/bin/expect
 
-if {$argc != 3} {
-	puts "usage: $argv0 <tty> <board> <action>"
+if {$argc != 4} {
+	puts "usage: $argv0 <tty> <board> <action> <value>"
 	exit
 }
 
 set tty [lindex $argv 0]
 set board [lindex $argv 1]
 set action [lindex $argv 2]
+set value [lindex $argv 3]
 
 set boards "hikey jetson zynq"
-set actions "on off reset connect disconnect"
+set actions "power reset usb flash fastboot"
+set values "on off"
 
 # Sanity checks on board
 if {[string first $board $boards] == -1} {
@@ -23,9 +25,16 @@ if {[string first $action $actions] == -1} {
     exit
 }
 
+# Sanity checks on values
+if {[string first $value $values] == -1} {
+    puts "Valid actions are: $values"
+    exit
+}
+
 puts "tty: ${tty}"
 puts "board: ${board}"
 puts "action : ${action}"
+puts "value: ${value}"
 
 # Open tty
 set f [open $tty w+]
@@ -49,72 +58,116 @@ switch $board {
     "jetson" {
         set l 0
         switch $action {
-            "on" {
-                # Open switch
-                send "Hsb0r2l${l}=0\r"
-                expect "OK"
-                # Power Up the board
-                send "Hsb0r1l${l}=1\r"
-                expect "OK"
-                # Wait
-                after 3000
-                # Emulate power On button action
-                send "Hsb0r2l${l}=1\r"
-                expect "OK"
-                after 200
-                send "Hsb0r2l${l}=0\r"
-                expect "OK"
-                after 200
-                send "Hsb0r2l${l}=1\r"
-                expect "OK"
-                after 200
-                send "Hsb0r2l${l}=0\r"
-                expect "OK"
-            }
-            "off" {
-                puts "action : ${action}"
-                # Need to emulate Power On button pressed for > 7s
-                # Close switch
-                send "Hsb0r2l${l}=1\r"
-                expect "OK"
-                after 10000
-                # Open Switch
-                send "Hsb0r2l${l}=0\r"
-                expect "OK"
-                # Board should be OFF now..
-                # Unplug power source
-                send "Hsb0r1l${l}=0\r"
-                expect "OK"
-            }
-            "reset" {
-                puts "action : ${action}"
+            "power" {
+                switch $value {
+                    "on" {
+                        # Open switch
+                        send "Hsb0r2l${l}=0\r"
+                        expect "OK"
+                        # Power Up the board
+                        send "Hsb0r1l${l}=1\r"
+                        expect "OK"
+                        # Wait
+                        after 3000
+                        # Emulate power On button action
+                        send "Hsb0r2l${l}=1\r"
+                        expect "OK"
+                        after 200
+                        send "Hsb0r2l${l}=0\r"
+                        expect "OK"
+                        after 200
+                        send "Hsb0r2l${l}=1\r"
+                        expect "OK"
+                        after 200
+                        send "Hsb0r2l${l}=0\r"
+                        expect "OK"
+                    }
+                    "off" {
+                        # Need to emulate Power On button pressed for > 7s
+                        # Close switch
+                        send "Hsb0r2l${l}=1\r"
+                        expect "OK"
+                        after 10000
+                        # Open Switch
+                        send "Hsb0r2l${l}=0\r"
+                        expect "OK"
+                        # Board should be OFF now..
+                        # Unplug power source
+                        send "Hsb0r1l${l}=0\r"
+                        expect "OK"
+                    }
+                    default {
+                        puts "$value is not supported"
+                    }
+                }
             }
             default {
                 puts "$action is not supported"
-                exit
             }
         }
     }
     "hikey" {
         set l 1
         switch $action {
-            "on" {
-                send "Hsb0r1l${l}=1\r"
-                expect "OK"
+            "power" {
+                switch $value {
+                    "on" {
+                        send "Hsb0r1l${l}=1\r"
+                        expect "OK"
+                    }
+                    "off" {
+                        send "Hsb0r1l${l}=0\r"
+                        expect "OK"
+                    }
+                    default {
+                        puts "$value is not supported"
+                    }
+                }
             }
-            "off" {
-                send "Hsb0r1l${l}=0\r"
-                expect "OK"
+            "usb" {
+                switch $value {
+                    "on" {
+                        send "Hsb0r0l${l}=1\r"
+                        expect "OK"
+                    }
+                    "off" {
+                        send "Hsb0r0l${l}=0\r"
+                        expect "OK"
+                    }
+                    default {
+                        puts "$value is not supported"
+                    }
+                }
             }
-            "reset" {
+            "flash" {
+                switch $value {
+                    "on" {
+                        send "Hsb0r2l${l}=1\r"
+                        expect "OK"
+                    }
+                    "off" {
+                        send "Hsb0r2l${l}=0\r"
+                        expect "OK"
+                    }
+                    default {
+                        puts "$value is not supported"
+                    }
+                }
             }
-            "connect" {
-                send "Hsb0r0l${l}=1\r"
-                expect "OK"
-            }
-            "disconnect" {
-                send "Hsb0r0l${l}=0\r"
-                expect "OK"
+            "fastboot" {
+                switch $value {
+                    "on" {
+                        send "Hsb0r2l2=1\r"
+                        expect "OK"
+                    }
+                    "off" {
+                        send "Hsb0r2l2=0\r"
+                        expect "OK"
+                    }
+                    default {
+                        puts "$value is not supported"
+                    }
+                }
             }
             default {
                 puts "$action is not supported"
@@ -124,15 +177,20 @@ switch $board {
     "zynq" {
         set l 2
         switch $action {
-            "on" {
-                send "Hsb0r1l${l}=1\r"
-                expect "OK"
-            }
-            "off" {
-                send "Hsb0r1l${l}=0\r"
-                expect "OK"
-            }
-            "reset" {
+            "power" {
+                switch $value {
+                   "on" {
+                       send "Hsb0r1l${l}=1\r"
+                       expect "OK"
+                   }
+                   "off" {
+                       send "Hsb0r1l${l}=0\r"
+                       expect "OK"
+                   }
+                   default {
+                       puts "$value is not supported"
+                   }
+               }
             }
             default {
                 puts "$action is not supported"
