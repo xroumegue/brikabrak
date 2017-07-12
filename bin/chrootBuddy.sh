@@ -49,7 +49,7 @@ OPTIONS:
 	--name: The name of the chroot
 	--user: user authorized to use the chroot
 	--group: group authorized to use the chroot
-	--release: Debian release (stable, testing, unstable)
+	--release: Debian release (oldstable, stable, testing, unstable)
 	--arch: chroot architecture
 	--prefix: Where to install the chroot
 	--extra: postinstalled packages, at next available version
@@ -70,6 +70,7 @@ fi
 
 
 case $RELEASE in
+	"oldstable") EXTRA_RELEASE="stable";;
 	"stable") EXTRA_RELEASE="testing";;
 	"testing") EXTRA_RELEASE="unstable";;
 	"unstable") EXTRA_RELEASE="experimental";;
