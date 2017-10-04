@@ -113,7 +113,10 @@ SCRIPT_2ND_STAGE=/root/2ndstage_$CHROOT_NAME
 set -x
 debootstrap --include="$PACKAGES" --arch="$ARCH" "$RELEASE" "$CHROOT_HOME" "$MIRROR"
 
-[ $? == 0 ] || exit 1
+if [ $? != 0 ]; then
+log "debootstrap failed. Please check log file under $CHROOT_HOME"
+exit 1
+fi
 
 if [ ! -f "$CHROOT_CONF"  ]; then
 log "Creating dedicated schroot conf file $CHROOT_CONF "
