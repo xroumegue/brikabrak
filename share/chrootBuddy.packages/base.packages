@@ -1,1 +1,1 @@
-locales,sudo,libc6,libc6-dev,linux-libc-dev,bash,vim,exuberant-ctags,build-essential,git,pkg-config,cmake,zlib1g-dev,multiarch-support,ca-certificates,netcat-openbsd,curl,git-core,unzip,ssh
+locales,sudo,libc6,libc6-dev,linux-libc-dev,bash,vim,cscope,exuberant-ctags,build-essential,git,pkg-config,cmake,zlib1g-dev,multiarch-support,ca-certificates,netcat-openbsd,curl,git-core,unzip,ssh
