@@ -1,1 +1,1 @@
-dos2unix,libboost-all-dev,libavformat-dev,libavutil-dev,libavcodec-dev,libswscale-dev,libjpeg-dev
+dos2unix,libboost-all-dev,libavformat-dev,libavutil-dev,libavcodec-dev,libswscale-dev,libreadline-dev,libqt4-dev,libjpeg-dev,libpng12-dev,imagemagick,libzmq3-dev,gfortran,gnuplot,gnuplot-x11,ipython,libfftw3-dev,sox,libsox-dev
