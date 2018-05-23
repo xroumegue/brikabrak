@@ -62,6 +62,7 @@ OPTIONS:
 EXAMPLE:
 	sudo ./chrootBuddy.sh  --verbose --name enet --release stable --prefix /srv/chroot --arch amd64 --extra cuda --packages enet
 	sudo ./chrootBuddy.sh  --verbose --name epoc  --release stable --prefix /srv/chroot --arch amd64 --extra "cuda extra" --packages "opencv ssd enet"
+	sudo ./chrootBuddy.sh  --verbose --name ubuntu --release 14.04 --prefix /srv/chroot --arch amd64 --system ubuntu
 EOF
 	exit 0
 }
@@ -160,8 +161,8 @@ fi
 log "Configuring fstab for shm"
 sed -i  -e 's/#\/dev\/shm/\/dev\/shm/' "/etc/schroot/$NAME/fstab"
 
+log "Configuring release sources... "
 if [ $SYSTEM = "debian" ]; then
-	log "Configuring release sources... "
 
 { echo "deb $MIRROR $RELEASE main contrib non-free"; echo "deb-src $MIRROR $RELEASE main contrib non-free"; echo "deb $MIRROR $EXTRA_RELEASE main contrib non-free"; echo "deb-src $MIRROR $EXTRA_RELEASE main contrib non-free";} > "$CHROOT_HOME/etc/apt/sources.list"
 
@@ -198,13 +199,14 @@ Acquire::ftp::Proxy "$ftp_proxy";
 EOF
 fi
 
+if [ $SYSTEM = "debian" ]; then
 log "Configuring locales... "
 sed -i  -e   's/# en_US/en_US/' "$CHROOT_HOME/etc/locale.gen"
 cat >> "$CHROOT_HOME/etc/default/locale" <<EOF
 LANG=en_US
 LANGUAGE="en_US:en"
 EOF
-
+fi
 
 log "Configuring 2nd stage script... "
 cat > "$CHROOT_HOME/$SCRIPT_2ND_STAGE" <<EOF
